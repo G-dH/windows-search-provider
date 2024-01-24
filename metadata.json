@@ -4,11 +4,12 @@
   "settings-schema": "org.gnome.shell.extensions.windows-search-provider",
   "name": "WSP (Windows Search Provider)",
   "shell-version": [
-    "45",
-    "46"
+    "42",
+    "43",
+    "44"
   ],
   "url": "https://github.com/G-dH/windows-search-provider",
   "donations": {"buymeacoffee": "georgdh"},
   "uuid": "windows-search-provider@G-dH.github.com",
-  "version-name": "46.1"
+  "version-name": "44.1"
 }
