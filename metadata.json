@@ -1,0 +1,14 @@
+{
+  "description": "Access open windows from the overview's search.",
+  "gettext-domain": "windows-search-provider",
+  "settings-schema": "org.gnome.shell.extensions.windows-search-provider",
+  "name": "WSP (Windows Search Provider)",
+  "shell-version": [
+    "45",
+    "46"
+  ],
+  "url": "https://github.com/G-dH/windows-search-provider",
+  "donations": {"buymeacoffee": "georgdh"},
+  "uuid": "windows-search-provider@G-dH.github.com",
+  "version-name": "45.1",
+}
