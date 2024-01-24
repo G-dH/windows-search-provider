@@ -20,7 +20,7 @@ This extensions has been originally crated as a module for the V-Shell extension
 
 ## Installation
 ### Installation from extensions.gnome.org
-The easiest way to install ESP: go to [extensions.gnome.org](https://extensions.gnome.org/extension/6730/) and toggle the switch. This installation also gives you automatic updates in the future.
+The easiest way to install WSP: go to [extensions.gnome.org](https://extensions.gnome.org/extension/6730/) and toggle the switch. This installation also gives you automatic updates in the future.
 
 ### Installation from GitHub repository
 You may need to install `git`, `make`, `gettext` and `glib2.0` for successful installation.
