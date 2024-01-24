@@ -13,8 +13,8 @@ This extensions has been originally crated as a module for the V-Shell extension
 2.  a) Type the name of the extension you are looking for; 5 first results will be added to the global search<br>
     b) Type `wq//`, `qqw` or ``` ` ```/`;`/`|` (usually the key above Tab) to list all open windows. You can continue typing a string from the window title or app name to filter the list<br>
 3.  a) Activate the search result to activate the window<br>
-    b) Activate the search result while holding down the *Ctrl* key to move the window to the current workspace
-    c) Activate the search result while holding down the *Ctrl* and *Shift* keys to move all windows of the selected app to the current workspace
+    b) Activate the search result while holding down the *Shift* key to move the window to the current workspace and activate it
+    c) Activate the search result while holding down the *Ctrl* and *Shift* keys to move all results to the current workspace and activate the activated window
 
 ## Installation
 ### Installation from GitHub repository
