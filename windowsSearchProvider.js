@@ -266,11 +266,17 @@ const WindowsSearchProvider = class WindowsSearchProvider {
         };
     }
 
-    launchSearch(terms/* , timeStamp*/) {
-        Main.overview._overview._controls._searchController._searchResults._reset();
-        Main.overview._overview.controls._searchEntry.set_text(`${PREFIXES[0]} ${terms}`);
-        // cause an error so the overview will stay open
-        this.dummyError();
+    launchSearch(terms, timeStamp) {
+        if (this._listAllResults) {
+            // launch Extensions app
+            this.appInfo.launch([], global.create_app_launch_context(timeStamp, -1), null);
+        } else {
+            // update search so all results will be listed
+            Main.overview._overview._controls._searchController._searchResults._reset();
+            Main.overview._overview.controls._searchEntry.set_text(`${PREFIXES[0]} ${terms}`);
+            // cause an error so the overview will stay open
+            this.dummyError();
+        }
     }
 
     activateResult(resultId/* , terms, timeStamp*/) {
