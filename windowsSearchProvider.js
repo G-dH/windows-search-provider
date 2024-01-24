@@ -9,13 +9,9 @@
 
 'use strict';
 
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
-import Meta from 'gi://Meta';
-import Shell from 'gi://Shell';
-import St from 'gi://St';
+const  { GLib, Gio, GObject, Clutter, Meta, Shell, St } = imports.gi;
 
-import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+const Main = imports.ui.main;
 
 const Action = {
     NONE: 0,
@@ -26,7 +22,7 @@ const Action = {
 };
 
 let Me;
-// let opt;
+let opt;
 // gettext
 let _;
 let _toggleTimeout;
@@ -35,10 +31,10 @@ let _toggleTimeout;
 // so it needs to be something less common
 const PREFIXES = ['wq//', 'qqw', '`', ';', '|'];
 
-export const WindowsSearchProviderModule = class {
+var WindowsSearchProviderModule = class {
     constructor(me) {
         Me = me;
-        // opt = Me.opt;
+        opt = Me.opt;
         _  = Me._;
 
         this._firstActivation = true;
@@ -49,7 +45,7 @@ export const WindowsSearchProviderModule = class {
 
     cleanGlobals() {
         Me = null;
-        // opt = null;
+        opt = null;
         _ = null;
     }
 
@@ -127,7 +123,11 @@ const WindowsSearchProvider = class WindowsSearchProvider {
         this.action = 0;
     }
 
-    getInitialResultSet(terms/* , cancellable*/) {
+    getInitialResultSet(terms, callback, cancellable) {
+        // In GS 43 callback arg has been removed
+        /* if (shellVersion >= 43)
+            cancellable = callback;*/
+
         let windows;
         this.windows = windows = {};
         global.display.get_tab_list(Meta.TabList.NORMAL, null).filter(w => w.get_workspace() !== null).map(
@@ -137,7 +137,12 @@ const WindowsSearchProvider = class WindowsSearchProvider {
             }
         );
 
-        return new Promise(resolve => resolve(this._getResultSet(terms)));
+        if (!cancellable)
+            return new Promise(resolve => resolve(this._getResultSet(terms)));
+        else
+            callback(this._getResultSet(terms));
+
+        return null;
     }
 
     _getResultSet(terms) {
@@ -328,7 +333,15 @@ const WindowsSearchProvider = class WindowsSearchProvider {
             : results.slice(0, maxResults);
     }
 
-    getSubsearchResultSet(previousResults, terms) {
+    getSubsearchResultSet(previousResults, terms, callback) {
+        if (Me.shellVersion < 43) {
+            this.getSubsearchResultSet42(terms, callback);
+            return null;
+        }
         return this.getInitialResultSet(terms);
+    }
+
+    getSubsearchResultSet42(terms, callback) {
+        callback(this._getResultSet(terms));
     }
 };

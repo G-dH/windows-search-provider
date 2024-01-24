@@ -10,88 +10,21 @@
 
 'use strict';
 
-import GLib from 'gi://GLib';
-import Clutter from 'gi://Clutter';
-import Meta from 'gi://Meta';
-import Shell from 'gi://Shell';
+const  { GLib, Clutter, Meta, Shell } = imports.gi;
 
-import * as Main from 'resource:///org/gnome/shell/ui/main.js';
-import { InjectionManager } from  'resource:///org/gnome/shell/extensions/extension.js';
+const Main = imports.ui.main;
 
 let Me;
 
-export function init(me) {
+function init(me) {
     Me = me;
 }
 
-export function cleanGlobals() {
+function cleanGlobals() {
     Me = null;
 }
 
-export class Overrides extends InjectionManager {
-    constructor() {
-        super();
-        this._overrides = {};
-    }
-
-    addOverride(name, prototype, overrideList) {
-        const backup = this.overrideProto(prototype, overrideList, name);
-        // don't update originals when override's just refreshing, keep initial content
-        let originals = this._overrides[name]?.originals;
-        if (!originals)
-            originals = backup;
-        this._overrides[name] = {
-            originals,
-            prototype,
-        };
-    }
-
-    removeOverride(name) {
-        const override = this._overrides[name];
-        if (!override)
-            return false;
-
-        this.overrideProto(override.prototype, override.originals, name);
-        delete this._overrides[name];
-        return true;
-    }
-
-    removeAll() {
-        for (let name in this._overrides) {
-            this.removeOverride(name);
-            delete this._overrides[name];
-        }
-    }
-
-    overrideProto(proto, overrides, name) {
-        const backup = {};
-        const originals = this._overrides[name]?.originals;
-        for (let symbol in overrides) {
-            if (symbol.startsWith('after_')) {
-                const actualSymbol = symbol.slice('after_'.length);
-                let fn;
-                if (originals && originals[actualSymbol])
-                    fn = originals[actualSymbol];
-                else
-                    fn = proto[actualSymbol];
-                const afterFn = overrides[symbol];
-                proto[actualSymbol] = function (...args) {
-                    args = Array.prototype.slice.call(args);
-                    const res = fn.apply(this, args);
-                    afterFn.apply(this, args);
-                    return res;
-                };
-                backup[actualSymbol] = fn;
-            } else if (overrides[symbol] !== null) {
-                backup[symbol] = proto[symbol];
-                this._installMethod(proto, symbol, overrides[symbol]);
-            }
-        }
-        return backup;
-    }
-}
-
-export function openPreferences(metadata) {
+function openPreferences(metadata) {
     if (!metadata)
         metadata = Me.metadata;
     const windows = global.display.get_tab_list(Meta.TabList.NORMAL_ALL, null);
@@ -133,38 +66,25 @@ export function openPreferences(metadata) {
     }
 }
 
-export function activateSearchProvider(prefix = '') {
-    const searchEntry = Main.overview.searchEntry;
-    if (!searchEntry.get_text() || !searchEntry.get_text().startsWith(prefix)) {
-        prefix = `${prefix} `;
-        const position = prefix.length;
-        searchEntry.set_text(prefix);
-        searchEntry.get_first_child().set_cursor_position(position);
-        searchEntry.get_first_child().set_selection(position, position);
-    } else {
-        searchEntry.set_text('');
-    }
-}
-
-export function isShiftPressed(state = null) {
+function isShiftPressed(state = null) {
     if (state === null)
         [,, state] = global.get_pointer();
     return (state & Clutter.ModifierType.SHIFT_MASK) !== 0;
 }
 
-export function isCtrlPressed(state = null) {
+function isCtrlPressed(state = null) {
     if (state === null)
         [,, state] = global.get_pointer();
     return (state & Clutter.ModifierType.CONTROL_MASK) !== 0;
 }
 
-export function isAltPressed(state = null) {
+function isAltPressed(state = null) {
     if (state === null)
         [,, state] = global.get_pointer();
     return (state & Clutter.ModifierType.MOD1_MASK) !== 0;
 }
 
-export function fuzzyMatch(term, text) {
+function fuzzyMatch(term, text) {
     let pos = -1;
     const matches = [];
     // convert all accented chars to their basic form and to lower case
@@ -200,7 +120,7 @@ export function fuzzyMatch(term, text) {
     return matches.reduce((r, p) => r + p) - matches.length * matches[0] + matches[0];
 }
 
-export function strictMatch(term, text) {
+function strictMatch(term, text) {
     // remove diacritics and accents from letters
     let s = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
     let p = term.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
@@ -214,7 +134,7 @@ export function strictMatch(term, text) {
     return 0;
 }
 
-export function isMoreRelevant(stringA, stringB, pattern) {
+function isMoreRelevant(stringA, stringB, pattern) {
     let regex = /[^a-zA-Z\d]/;
     let strSplitA = stringA.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().split(regex);
     let strSplitB = stringB.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().split(regex);
