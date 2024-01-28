@@ -66,7 +66,7 @@ export const WindowsSearchProviderModule = class {
     }
 
     _activateModule() {
-        // GNOME 43/44 has a problem registering a new provider during Shell's startup
+        // delay to ensure that all default providers are already registered
         let delay = 0;
         if (Main.layoutManager._startingUp)
             delay = 2000;

@@ -77,8 +77,8 @@ export default class ESP extends ExtensionPreferences {
 
         optionList.push(
             itemFactory.getRowWidget(
-                _('Custom Command Prefix'),
-                _('Strings separated by space. The command prefix is a character/string added in front of the searched pattern, serving as both a blocker for other search providers and a command to ESP to list an all results. The default fixed command prefix is "eq//"'),
+                _('Custom Search Prefixes'),
+                _('Strings separated by space. The search prefix is a character/string added in front of the searched pattern (optionally followed by a space), serving as both a blocker for other search providers and a command to WSP to list all results instead of the default, limited to 5 results. The default fixed search prefix is "wq//"'),
                 itemFactory.newEditableEntry(),
                 'customPrefixes'
             )
@@ -96,7 +96,7 @@ export default class ESP extends ExtensionPreferences {
         optionList.push(
             itemFactory.getRowWidget(
                 _('Exclude Results From Global Search'),
-                _('Show results only if a the command prefix is used, so the WSP results do not clutter the global search'),
+                _('Show results only if a search prefix is used, so that WSP results do not clutter the global search'),
                 itemFactory.newSwitch(),
                 'excludeFromGlobalSearch'
             )
@@ -105,7 +105,7 @@ export default class ESP extends ExtensionPreferences {
         optionList.push(
             itemFactory.getRowWidget(
                 _('Sorting'),
-                _('Order of windows in the full list, when you use command prefix alone'),
+                _('Order of windows in the complete list when using a search prefix alone'),
                 itemFactory.newDropDown(),
                 'resultsOrder',
                 [
