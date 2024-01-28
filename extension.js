@@ -41,8 +41,7 @@ export default class WSP extends Extension.Extension {
     disable() {
         this._wsp.update(true);
         this._wsp.cleanGlobals();
-        this.Util.cleanGlobals();
-        this.Util = null;
+        this.Me.Util.cleanGlobals();
         this.Me = null;
         this._wsp = null;
 
