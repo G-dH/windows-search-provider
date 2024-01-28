@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<schemalist>
+  <schema path='/org/gnome/shell/extensions/windows-search-provider/' id='org.gnome.shell.extensions.windows-search-provider'>
+    <key name='custom-prefixes' type='s'>
+      <default>'qqw ; ` |'</default>
+    </key>
+    <key name='exclude-from-global-search' type='b'>
+      <default>false</default>
+    </key>
+    <key name='results-order' type='i'>
+      <default>1</default>
+    </key>
+    <key name='fuzzy-match' type='b'>
+      <default>false</default>
+    </key>
+    <key name='dash-icon-position' type='i'>
+      <default>1</default>
+    </key>
+  </schema>
+</schemalist>
