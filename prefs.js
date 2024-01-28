@@ -176,7 +176,7 @@ export default class ESP extends ExtensionPreferences {
 
         optionList.push(itemFactory.getRowWidget(
             _('GNOME Extensions'),
-            _('Rate and comment V-Shell on the GNOME Extensions site'),
+            _('Rate and comment WSP on the GNOME Extensions site'),
             itemFactory.newLinkButton('https://extensions.gnome.org/extension/6730')
         ));
 
@@ -188,7 +188,7 @@ export default class ESP extends ExtensionPreferences {
 
         optionList.push(itemFactory.getRowWidget(
             _('Buy Me a Coffee'),
-            _('If you like ESP, you can help me with my coffee expenses'),
+            _('If you have found ESP useful, you can help me with coffee expenses'),
             itemFactory.newLinkButton('https://buymeacoffee.com/georgdh')
         ));
 
