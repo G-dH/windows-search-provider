@@ -43,6 +43,7 @@ export default class WSP extends Extension.Extension {
         this._wsp.cleanGlobals();
         this.Util.cleanGlobals();
         this.Util = null;
+        this.Me = null;
         this._wsp = null;
 
         console.debug(`${this.metadata.name}: disabled`);
