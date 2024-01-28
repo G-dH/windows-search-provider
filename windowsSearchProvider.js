@@ -26,20 +26,20 @@ const Action = {
 };
 
 let Me;
-// let opt;
+let opt;
 // gettext
 let _;
 let _toggleTimeout;
 
 // prefix helps to eliminate results from other search providers
 // so it needs to be something less common
-const PREFIXES = ['wq//', 'qqw', '`', ';', '|'];
+const PREFIX = 'wq//';
 
 export const WindowsSearchProviderModule = class {
     constructor(me) {
         Me = me;
-        // opt = Me.opt;
-        _  = Me._;
+        opt = Me.opt;
+        _  = Me.gettext;
 
         this._firstActivation = true;
         this.moduleEnabled = false;
@@ -49,7 +49,7 @@ export const WindowsSearchProviderModule = class {
 
     cleanGlobals() {
         Me = null;
-        // opt = null;
+        opt = null;
         _ = null;
     }
 
@@ -76,7 +76,7 @@ export const WindowsSearchProviderModule = class {
             () => {
                 if (!this._windowsSearchProvider) {
                     this._windowsSearchProvider = new WindowsSearchProvider();
-                    this._getOverviewSearchResult()._registerProvider(this._windowsSearchProvider);
+                    this._registerProvider(this._windowsSearchProvider);
                 }
                 this._enableTimeoutId = 0;
                 return GLib.SOURCE_REMOVE;
@@ -92,15 +92,34 @@ export const WindowsSearchProviderModule = class {
             this._enableTimeoutId = 0;
         }
         if (this._windowsSearchProvider) {
-            this._getOverviewSearchResult()._unregisterProvider(this._windowsSearchProvider);
+            this._unregisterProvider(this._windowsSearchProvider);
             this._windowsSearchProvider = null;
         }
 
         console.debug('  WindowsSearchProviderModule - Disabled');
     }
 
-    _getOverviewSearchResult() {
-        return Main.overview._overview.controls._searchController._searchResults;
+    _registerProvider(provider) {
+        const searchResults = Main.overview.searchController._searchResults;
+        provider.searchInProgress = false;
+
+        // insert WSP after app search but above all other providers
+        searchResults._providers.splice(1, 0, provider);
+
+        // create results display and add it to the _content
+        searchResults._ensureProviderDisplay.bind(searchResults)(provider);
+
+        // more important is to move the display up in the search view
+        // displays are at stable positions and show up when their providers have content to display
+        // another way to move our provider up below the applications provider is reloading remote providers
+        // searchResults._reloadRemoteProviders()
+        searchResults._content.remove_child(provider.display);
+        searchResults._content.insert_child_at_index(provider.display, 1);
+    }
+
+    _unregisterProvider(provider) {
+        const searchResults = Main.overview.searchController._searchResults;
+        searchResults._unregisterProvider(provider);
     }
 };
 
@@ -141,20 +160,29 @@ const WindowsSearchProvider = class WindowsSearchProvider {
     }
 
     _getResultSet(terms) {
+        const prefixes = [PREFIX];
+        prefixes.push(...opt.CUSTOM_PREFIXES);
+
         let prefix;
-        for (let p of PREFIXES) {
-            if (terms[0].startsWith(p)) {
+        for (let p of prefixes) {
+            p = new RegExp(`^${p}`, 'i');
+            if (p.test(terms[0])) {
                 prefix = p;
                 break;
             }
         }
+
+        if (!prefix && opt.EXCLUDE_FROM_GLOBAL_SEARCH)
+            return new Map();
+
         this._listAllResults = !!prefix;
+
         // do not modify original terms
         let termsCopy = [...terms];
         // search for terms without prefix
         termsCopy[0] = termsCopy[0].replace(prefix, '');
 
-        /* if (gOptions.get('searchWindowsCommands')) {
+        /* if (opt.get('allowCommands')) {
             this.action = 0;
             this.targetWs = 0;
 
@@ -180,31 +208,28 @@ const WindowsSearchProvider = class WindowsSearchProvider {
 
         const candidates = this.windows;
         const _terms = [].concat(termsCopy);
-        // let match;
 
         const term = _terms.join(' ');
-        /* match = s => {
-            return fuzzyMatch(term, s);
-        }; */
 
         const results = [];
         let m;
         for (let key in candidates) {
-            /* if (opt.SEARCH_FUZZY)
+            if (opt.FUZZY)
                 m = Me.Util.fuzzyMatch(term, candidates[key].name);
-            else*/
-            m = Me.Util.strictMatch(term, candidates[key].name);
+            else
+                m = Me.Util.strictMatch(term, candidates[key].name);
+
             if (m !== -1)
                 results.push({ weight: m, id: key });
         }
 
         results.sort((a, b) => a.weight > b.weight);
         const currentWs = global.workspace_manager.get_active_workspace_index();
-        // prefer current workspace
-        /* switch (opt.WINDOW_SEARCH_ORDER) {
+
+        switch (opt.RESULTS_ORDER) {
         case 1: // MRU - current ws first*/
-        results.sort((a, b) => (this.windows[a.id].window.get_workspace().index() !== currentWs) && (this.windows[b.id].window.get_workspace().index() === currentWs));
-        /*    break;
+            results.sort((a, b) => (this.windows[a.id].window.get_workspace().index() !== currentWs) && (this.windows[b.id].window.get_workspace().index() === currentWs));
+            break;
         case 2: // MRU - by workspace
             results.sort((a, b) => this.windows[a.id].window.get_workspace().index() > this.windows[b.id].window.get_workspace().index());
             break;
@@ -212,7 +237,7 @@ const WindowsSearchProvider = class WindowsSearchProvider {
             results.sort((a, b) => this.windows[a.id].window.get_stable_sequence() > this.windows[b.id].window.get_stable_sequence());
             results.sort((a, b) => this.windows[a.id].window.get_workspace().index() > this.windows[b.id].window.get_workspace().index());
             break;
-        }*/
+        }
 
         results.sort((a, b) => (_terms !== ' ') && (a.weight > 0 && b.weight === 0));
 
@@ -268,7 +293,7 @@ const WindowsSearchProvider = class WindowsSearchProvider {
         } else {
             // update search so all results will be listed
             Main.overview._overview._controls._searchController._searchResults._reset();
-            Main.overview._overview.controls._searchEntry.set_text(`${PREFIXES[0]} ${terms}`);
+            Main.overview._overview.controls._searchEntry.set_text(`${PREFIX} ${terms}`);
             // cause an error so the overview will stay open
             this.dummyError();
         }

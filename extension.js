@@ -13,15 +13,24 @@
 import * as Extension from 'resource:///org/gnome/shell/extensions/extension.js';
 
 // Me imports
+import * as Settings from './settings.js';
 import { WindowsSearchProviderModule } from './windowsSearchProvider.js';
 import * as Util from './util.js';
 
 export default class WSP extends Extension.Extension {
     enable() {
-        const Me = this;
+        const Me = {};
+
+        Me.getSettings = this.getSettings.bind(this);
+        Me.metadata = this.metadata;
+        Me.gSettings = this.getSettings();
+        Me.Settings = Settings;
         Me.Util = Util;
-        Me.Util.init(Me);
-        Me._ = this.gettext.bind(this);
+        Me.gettext = this.gettext.bind(this);
+
+        Me.opt = new Me.Settings.Options(Me);
+
+        this.Me = Me;
 
         this._wsp = new WindowsSearchProviderModule(Me);
         this._wsp.update();
