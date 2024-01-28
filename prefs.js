@@ -188,7 +188,7 @@ export default class ESP extends ExtensionPreferences {
 
         optionList.push(itemFactory.getRowWidget(
             _('Buy Me a Coffee'),
-            _('If you have found ESP useful, you can help me with coffee expenses'),
+            _('If you have found WSP useful, you can help me with coffee expenses'),
             itemFactory.newLinkButton('https://buymeacoffee.com/georgdh')
         ));
 
