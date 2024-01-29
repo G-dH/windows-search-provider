@@ -16,6 +16,7 @@ import Shell from 'gi://Shell';
 import St from 'gi://St';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as Search from 'resource:///org/gnome/shell/ui/search.js';
 
 const Action = {
     NONE: 0,
@@ -66,6 +67,9 @@ export const WindowsSearchProviderModule = class {
     }
 
     _activateModule() {
+        this._overrides = new Me.Util.Overrides();
+        this._overrides.addOverride('SearchResult', Search.SearchResult.prototype, SearchResultOverride);
+
         // delay to ensure that all default providers are already registered
         let delay = 0;
         if (Main.layoutManager._startingUp)
@@ -96,6 +100,9 @@ export const WindowsSearchProviderModule = class {
             this._windowsSearchProvider = null;
         }
 
+        this._overrides.removeAll();
+        this._overrides = null;
+
         console.debug('  WindowsSearchProviderModule - Disabled');
     }
 
@@ -123,11 +130,6 @@ export const WindowsSearchProviderModule = class {
     }
 };
 
-/* const closeSelectedRegex = /^\/x!$/;
-const closeAllResultsRegex = /^\/xa!$/;
-const moveToWsRegex = /^\/m[0-9]+$/;
-const moveAllToWsRegex = /^\/ma[0-9]+$/;*/
-
 const WindowsSearchProvider = class WindowsSearchProvider {
     constructor() {
         this.id = 'open-windows';
@@ -144,6 +146,11 @@ const WindowsSearchProvider = class WindowsSearchProvider {
         this.isRemoteProvider = false;
 
         this.action = 0;
+
+        this.closeSelectedRegex = /^\/x!$/;
+        this.closeAllResultsRegex = /^\/xa!$/;
+        this.moveToWsRegex = /^\/m[0-9]+$/;
+        this.moveAllToWsRegex = /^\/ma[0-9]+$/;
     }
 
     getInitialResultSet(terms/* , cancellable*/) {
@@ -182,42 +189,44 @@ const WindowsSearchProvider = class WindowsSearchProvider {
         // search for terms without prefix
         termsCopy[0] = termsCopy[0].replace(prefix, '');
 
-        /* if (opt.get('allowCommands')) {
+        if (opt.COMMANDS_ENABLED) {
             this.action = 0;
-            this.targetWs = 0;
+            this.targetWs = null;
 
-            const lastTerm = terms[terms.length - 1];
-            if (lastTerm.match(closeSelectedRegex)) {
+            const lastTerm = termsCopy[termsCopy.length - 1];
+            if (lastTerm.match(this.closeSelectedRegex))
                 this.action = Action.CLOSE;
-            } else if (lastTerm.match(closeAllResultsRegex)) {
+            else if (lastTerm.match(this.closeAllResultsRegex))
                 this.action = Action.CLOSE_ALL;
-            } else if (lastTerm.match(moveToWsRegex)) {
+            else if (lastTerm.match(this.moveToWsRegex))
                 this.action = Action.MOVE_TO_WS;
-            } else if (lastTerm.match(moveAllToWsRegex)) {
+            else if (lastTerm.match(this.moveAllToWsRegex))
                 this.action = Action.MOVE_ALL_TO_WS;
-            }
+
             if (this.action) {
-                terms.pop();
-                if (this.action === Action.MOVE_TO_WS || this.action === Action.MOVE_ALL_TO_WS) {
-                    this.targetWs = parseInt(lastTerm.replace(/^[^0-9]+/, '')) - 1;
-                }
+                termsCopy.pop();
+                if ([Action.MOVE_TO_WS, Action.MOVE_ALL_TO_WS].includes(this.action))
+                    this.targetWs = parseInt(lastTerm.replace(/^[^0-9]+/, ''));
             } else if (lastTerm.startsWith('/')) {
-                terms.pop();
+                termsCopy.pop();
             }
-        }*/
+        }
 
         const candidates = this.windows;
         const _terms = [].concat(termsCopy);
 
-        const term = _terms.join(' ');
+        const term = _terms.join(' ').trim();
 
         const results = [];
         let m;
         for (let key in candidates) {
-            if (opt.FUZZY)
-                m = Me.Util.fuzzyMatch(term, candidates[key].name);
-            else
+            if (opt.STRICT_MATCH) {
                 m = Me.Util.strictMatch(term, candidates[key].name);
+            } else if (opt.FUZZY_MATCH) {
+                m = Me.Util.fuzzyMatch(term, candidates[key].name);
+            } else { // if opt.REG_EXP_MATCH
+                m = Me.Util.regexpMatch(term, candidates[key].name, opt.REG_EXP_INSENSITIVE_MATCH ? 'i' : '');
+            }
 
             if (m !== -1)
                 results.push({ weight: m, id: key });
@@ -240,7 +249,6 @@ const WindowsSearchProvider = class WindowsSearchProvider {
         }
 
         results.sort((a, b) => (_terms !== ' ') && (a.weight > 0 && b.weight === 0));
-
         this.resultIds = results.map(item => item.id);
         return this.resultIds;
     }
@@ -286,6 +294,16 @@ const WindowsSearchProvider = class WindowsSearchProvider {
         };
     }
 
+    filterResults(results, maxResults) {
+        return this._listAllResults
+            ? results
+            : results.slice(0, maxResults);
+    }
+
+    getSubsearchResultSet(previousResults, terms) {
+        return this.getInitialResultSet(terms);
+    }
+
     launchSearch(terms, timeStamp) {
         if (this._listAllResults) {
             // launch Extensions app
@@ -303,15 +321,10 @@ const WindowsSearchProvider = class WindowsSearchProvider {
         const isCtrlPressed = Me.Util.isCtrlPressed();
         const isShiftPressed = Me.Util.isShiftPressed();
 
-        this.action = 0;
-        this.targetWs = 0;
-
-        this.targetWs = global.workspaceManager.get_active_workspace().index() + 1;
-        if (isShiftPressed && !isCtrlPressed)
+        if (!this.action && isShiftPressed && !isCtrlPressed)
             this.action = Action.MOVE_TO_WS;
-        else if (isShiftPressed && isCtrlPressed)
+        else if (!this.action && isShiftPressed && isCtrlPressed)
             this.action = Action.MOVE_ALL_TO_WS;
-
 
         if (!this.action) {
             const result = this.windows[resultId];
@@ -344,22 +357,33 @@ const WindowsSearchProvider = class WindowsSearchProvider {
     }
 
     _moveWindowsToWs(selectedId, resultIds) {
-        const workspace = global.workspaceManager.get_active_workspace();
+        const workspace = this.targetWs
+            ? global.workspaceManager.get_workspace_by_index(this.targetWs - 1)
+            : global.workspaceManager.get_active_workspace();
 
         for (let i = 0; i < resultIds.length; i++)
             this.windows[resultIds[i]].window.change_workspace(workspace);
 
-        const selectedWin = this.windows[selectedId].window;
-        selectedWin.activate_with_workspace(global.get_current_time(), workspace);
+        if (!Me.Util.isAltPressed()) {
+            const selectedWin = this.windows[selectedId].window;
+            workspace.activate(global.get_current_time());
+            selectedWin.activate(global.get_current_time());
+        }
     }
+};
 
-    filterResults(results, maxResults) {
-        return this._listAllResults
-            ? results
-            : results.slice(0, maxResults);
-    }
 
-    getSubsearchResultSet(previousResults, terms) {
-        return this.getInitialResultSet(terms);
-    }
+const SearchResultOverride = {
+    activate() {
+        this.provider.activateResult(this.metaInfo.id, this._resultsView.terms);
+
+        if (this.metaInfo.clipboardText) {
+            St.Clipboard.get_default().set_text(
+                St.ClipboardType.CLIPBOARD, this.metaInfo.clipboardText);
+        }
+        // Hold Alt to avoid leaving the overview
+        // this works for actions that don't involve a window activation which closes the overview too
+        if (!Me.Util.isAltPressed())
+            Main.overview.toggle();
+    },
 };

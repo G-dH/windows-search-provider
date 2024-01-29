@@ -39,8 +39,9 @@ export const Options = class Options {
             customPrefixes:          ['string', 'custom-prefixes'],
             excludeFromGlobalSearch: ['boolean', 'exclude-from-global-search'],
             resultsOrder:            ['int', 'results-order'],
-            fuzzyMatch:              ['boolean', 'fuzzy-match'],
+            searchMethod:            ['int', 'search-method'],
             dashIconPosition:        ['int', 'dash-icon-position'],
+            searchCommands:          ['boolean', 'search-commands'],
         };
 
         this.cachedOptions = {};
@@ -108,8 +109,13 @@ export const Options = class Options {
         this.CUSTOM_PREFIXES             = this.get('customPrefixes').replace(REGEXP_SPECIAL_CHAR, '\\$&').split(' ');
         this.RESULTS_ORDER               = this.get('resultsOrder');
         this.EXCLUDE_FROM_GLOBAL_SEARCH  = this.get('excludeFromGlobalSearch');
-        this.FUZZY                       = this.get('fuzzyMatch');
+        this.SEARCH_METHOD               = this.get('searchMethod');
+        this.STRICT_MATCH                = this.SEARCH_METHOD === 0;
+        this.FUZZY_MATCH                 = this.SEARCH_METHOD === 1;
+        this.REG_EXP_MATCH               = this.SEARCH_METHOD === 2;
+        this.REG_EXP_INSENSITIVE_MATCH   = this.SEARCH_METHOD === 3;
         this.DASH_ICON_POSITION          = this.get('dashIconPosition');
         this.DASH_ICON_HIDEN             = !this.DASH_ICON_POSITION;
+        this.COMMANDS_ENABLED            = this.get('searchCommands');
     }
 };
