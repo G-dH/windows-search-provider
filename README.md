@@ -22,10 +22,10 @@ WSP is supported by the V-Shell extension that allows you to toggle the window s
 ## Search methods
 Four options are available:
 
-Strict - strict match, but case and accent insensitive and you can enter multiple strings separated by a space in arbitrary order.
-Fuzzy - same as Strict except you can skip letters in individual strings. So you can find "Firefox" even if you enter "ffx".
-Regular Expression Case Sensitive - the search pattern is used as the JavaScript RegExp
-Regular Expression Case Insensitive - the search pattern is used as the JavaScript RegExp with the `i` flag
+- **Strict** - strict match, but case and accent insensitive and you can enter multiple strings separated by a space in arbitrary order
+- **Fuzzy** - same as Strict except you can skip letters in individual strings. So you can find "Firefox" even if you enter "ffx"
+- **Regular Expression Case Sensitive** - the search pattern is used as the JavaScript RegExp
+- **Regular Expression Case Insensitive** - the search pattern is used as the JavaScript RegExp with the `i` flag
 
 ## How to use WSP
 1.  Open the overview (press and release the Super key or trigger the hot corner)
