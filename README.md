@@ -3,10 +3,8 @@ A GNOME Shell extension that allows you to search and organize open windows from
 
 WSP is supported by the V-Shell extension which allows you to toggle the window search using the Space key in activities overview or by clicking on the dedicated icon in the dash.
 
-### Supported GNOME Shell versions
-42 - 46
-
 ## Features
+- Supports GNOME Shell 42 - 46
 - Open windows can be added to the top of the global search results
 - Adding a customizable prefix in front of the search pattern allows you to display an isolated window search view with a complete list of open windows
 - Strict, Fuzzy and RegExp search methods
@@ -22,7 +20,7 @@ WSP is supported by the V-Shell extension which allows you to toggle the window 
 ## How to use WSP
 1.  Open the overview (press and release the Super key or trigger the hot corner)
 2.  a) Type any part (or multiple parts separated by space) of the name of the extension you are looking for; 5 first results will be added to the global search<br>
-    b) Type search prefix (default `wq//`, `qqw` or ``` ` ```/`;`/`|` (usually the key above Tab)) to list all open windows. You can continue typing a string from the window title or app name to filter the list<br>
+    b) Type search prefix (default `wq//`, `qqw` or ``` ` ```/`;`/`|` (usually the key above Tab)) to display complete list of open windows. You can continue typing a string from the window title or app name to filter the list<br>
 3.  a) Activate the search result to activate the window<br>
     b) Activate the search result while holding down the *Shift* key to move the window to the current workspace and activate it
     c) Activate the search result while holding down the *Ctrl* and *Shift* keys to move all results to the current workspace and activate the activated window
@@ -50,12 +48,13 @@ Available commands:
 ## Modifier keys
 Use modifier keys to alter the default behavior of result activation
 
-| Modifier      | Description                                                                              |
-|---------------|------------------------------------------------------------------------------------------|
-| `Shift`       | Move activated window to current workspace and activate it                               |
-| `Shift + Ctrl`| Move all search results to the current workspace and activate the activated window       |
-| `Alt`         | If a command is used, holding the Alt key disables closing the overview after activation |
+| Modifier      | Description                                                                         |
+|---------------|-------------------------------------------------------------------------------------|
+| `Shift`       | Move activated window to current workspace and activate it                          |
+| `Shift + Ctrl`| Move all search results to the current workspace and activate the activated window  |
+| `Alt`         | Holding the Alt key prevents the overview from closing after a move or close action |
 
+The `Alt` key becomes more useful with the V-Shell extension because in V-Shell, workspace thumbnails are visible even in the search view. This allows you to easily redistribute windows across workspaces by clicking on windows and switching workspaces while holding the `Alt` and `Shift` keys.
 
 ## Installation
 ### Installation from extensions.gnome.org
