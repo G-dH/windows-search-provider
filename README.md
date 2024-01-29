@@ -1,7 +1,7 @@
 # WSP (Windows Search Provider)
 A GNOME Shell extension that allows you to search and organize open windows from the overview.
 
-WSP is supported by the V-Shell extension that allows you to toggle the window search using a Space key or by clicking on the dedicated icon in the dash in activities overview.
+WSP is supported by the V-Shell extension which allows you to toggle the window search using the Space key in activities overview or by clicking on the dedicated icon in the dash.
 
 ### Supported GNOME Shell versions
 42 - 46
@@ -19,14 +19,6 @@ WSP is supported by the V-Shell extension that allows you to toggle the window s
 
 ![WSP (Windows Search Provider)](screenshot.jpg)
 
-## Search methods
-Four options are available:
-
-- **Strict** - strict match, but case and accent insensitive and you can enter multiple strings separated by a space in arbitrary order
-- **Fuzzy** - same as Strict except you can skip letters in individual strings. So you can find "Firefox" even if you enter "ffx"
-- **Regular Expression Case Sensitive** - the search pattern is used as the JavaScript RegExp
-- **Regular Expression Case Insensitive** - the search pattern is used as the JavaScript RegExp with the `i` flag
-
 ## How to use WSP
 1.  Open the overview (press and release the Super key or trigger the hot corner)
 2.  a) Type any part (or multiple parts separated by space) of the name of the extension you are looking for; 5 first results will be added to the global search<br>
@@ -34,6 +26,14 @@ Four options are available:
 3.  a) Activate the search result to activate the window<br>
     b) Activate the search result while holding down the *Shift* key to move the window to the current workspace and activate it
     c) Activate the search result while holding down the *Ctrl* and *Shift* keys to move all results to the current workspace and activate the activated window
+
+## Search methods
+Four options are available:
+
+- **Strict** - strict match, but case and accent insensitive and you can enter multiple strings separated by a space in arbitrary order
+- **Fuzzy** - same as Strict except you can skip letters in individual strings. So you can find "Firefox" even if you enter "ffx"
+- **Regular Expression Case Sensitive** - the search pattern is used as the JavaScript RegExp
+- **Regular Expression Case Insensitive** - the search pattern is used as the JavaScript RegExp with the `i` flag
 
 ## Commands
 You can use all the features even without the mouse by adding a short command after the search pattern and a space.
