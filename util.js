@@ -11,6 +11,7 @@
 'use strict';
 
 const  { GLib, Clutter, Meta, Shell } = imports.gi;
+const Gi = imports._gi;
 
 const Main = imports.ui.main;
 
@@ -23,6 +24,79 @@ function init(me) {
 function cleanGlobals() {
     Me = null;
 }
+
+var Overrides = class {
+    constructor() {
+        this._overrides = {};
+    }
+
+    addOverride(name, prototype, overrideList) {
+        const backup = this.overrideProto(prototype, overrideList, name);
+        // don't update originals when override's just refreshing, keep initial content
+        let originals = this._overrides[name]?.originals;
+        if (!originals)
+            originals = backup;
+        this._overrides[name] = {
+            originals,
+            prototype,
+        };
+    }
+
+    removeOverride(name) {
+        const override = this._overrides[name];
+        if (!override)
+            return false;
+
+        this.overrideProto(override.prototype, override.originals, name);
+        delete this._overrides[name];
+        return true;
+    }
+
+    removeAll() {
+        for (let name in this._overrides) {
+            this.removeOverride(name);
+            delete this._overrides[name];
+        }
+    }
+
+    hookVfunc(proto, symbol, func) {
+        proto[Gi.hook_up_vfunc_symbol](symbol, func);
+    }
+
+    overrideProto(proto, overrides, name) {
+        const backup = {};
+        const originals = this._overrides[name]?.originals;
+        for (let symbol in overrides) {
+            if (symbol.startsWith('after_')) {
+                const actualSymbol = symbol.slice('after_'.length);
+                let fn;
+                if (originals && originals[actualSymbol])
+                    fn = originals[actualSymbol];
+                else
+                    fn = proto[actualSymbol];
+                const afterFn = overrides[symbol];
+                proto[actualSymbol] = function (...args) {
+                    args = Array.prototype.slice.call(args);
+                    const res = fn.apply(this, args);
+                    afterFn.apply(this, args);
+                    return res;
+                };
+                backup[actualSymbol] = fn;
+            } else {
+                backup[symbol] = proto[symbol];
+                if (symbol.startsWith('vfunc')) {
+                    if (Me.shellVersion < 42)
+                        this.hookVfunc(proto, symbol.slice(6), overrides[symbol]);
+                    else
+                        this.hookVfunc(proto[Gi.gobject_prototype_symbol], symbol.slice(6), overrides[symbol]);
+                } else if (overrides[symbol] !== null) {
+                    proto[symbol] = overrides[symbol];
+                }
+            }
+        }
+        return backup;
+    }
+};
 
 function openPreferences(metadata) {
     if (!metadata)
@@ -132,6 +206,11 @@ function strictMatch(term, text) {
             return -1;
     }
     return 0;
+}
+
+function regexpMatch(term, text, caseInsensitive) {
+    const regex = new RegExp(term, caseInsensitive);
+    return regex.test(text) ? 0 : -1;
 }
 
 function isMoreRelevant(stringA, stringB, pattern) {

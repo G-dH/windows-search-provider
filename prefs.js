@@ -97,10 +97,16 @@ class ESP {
 
         optionList.push(
             itemFactory.getRowWidget(
-                _('Enable Fuzzy Match'),
-                _('Enabling the fuzzy match allows you to skip letters in the pattern you are searching for and find "V-Shell" even if you enter "vll"'),
-                itemFactory.newSwitch(),
-                'fuzzyMatch'
+                _('Search Method'),
+                _('Choose how WSP will use the entered pattern. The "Strict" and "Fuzzy" options allow you to enter multiple strings separated by a space in any order, the input is case insensitive and accents are ignored. The "Fuzzy" match enables you to skip letters in the pattern, so you can find "V-Shell" even if you enter "vll" With the "Regular Expression" options, WSP will treat the entry as a regular expression for JavaScript"'),
+                itemFactory.newDropDown(),
+                'searchMethod',
+                [
+                    [_('Strict'), 0],
+                    [_('Fuzzy'), 1],
+                    [_('Regular Expression - Case Sensitive'), 2],
+                    [_('Regular Expression - Case Insensitive'), 3],
+                ]
             )
         );
 
@@ -125,6 +131,15 @@ class ESP {
                     [_('MRU - By Workspaces'), 2],
                     [_('Stable Sequence - By Workspaces'), 3],
                 ]
+            )
+        );
+
+        optionList.push(
+            itemFactory.getRowWidget(
+                _('Enable Search Commands'),
+                _('Enables for using commands separated by a space at the end of the search pattern\n\n/x!   \t\t\t- close selected window\n/xa! \t\t\t- close all displayed results\n/m[index] \t\t- (e.g. /m6) move selected window to the workspace with the given index\n/ma[index] \t\t- move all displayed results to the workspace with the given index'),
+                itemFactory.newSwitch(),
+                'searchCommands'
             )
         );
 
