@@ -192,6 +192,7 @@ const WindowsSearchProvider = class WindowsSearchProvider {
         if (opt.COMMANDS_ENABLED) {
             this.action = 0;
             this.targetWs = null;
+            this._commandUsed = false;
 
             const lastTerm = termsCopy[termsCopy.length - 1];
             if (lastTerm.match(this.closeSelectedRegex))
@@ -204,6 +205,7 @@ const WindowsSearchProvider = class WindowsSearchProvider {
                 this.action = Action.MOVE_ALL_TO_WS;
 
             if (this.action) {
+                this._commandUsed = true;
                 termsCopy.pop();
                 if ([Action.MOVE_TO_WS, Action.MOVE_ALL_TO_WS].includes(this.action))
                     this.targetWs = parseInt(lastTerm.replace(/^[^0-9]+/, ''));
@@ -318,12 +320,12 @@ const WindowsSearchProvider = class WindowsSearchProvider {
     }
 
     activateResult(resultId/* , terms, timeStamp*/) {
-        const isCtrlPressed = Me.Util.isCtrlPressed();
-        const isShiftPressed = Me.Util.isShiftPressed();
+        const ctrlPressed = Me.Util.isCtrlPressed();
+        const shiftPressed = Me.Util.isShiftPressed();
 
-        if (!this.action && isShiftPressed && !isCtrlPressed)
+        if (!this._commandUsed && shiftPressed && !ctrlPressed)
             this.action = Action.MOVE_TO_WS;
-        else if (!this.action && isShiftPressed && isCtrlPressed)
+        else if (!this._commandUsed && shiftPressed && ctrlPressed)
             this.action = Action.MOVE_ALL_TO_WS;
 
         if (!this.action) {
