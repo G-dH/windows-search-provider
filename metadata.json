@@ -1,5 +1,5 @@
 {
-  "description": "Access open windows from the overview's search.",
+  "description": "Search and control windows from the Activities overview",
   "gettext-domain": "windows-search-provider",
   "settings-schema": "org.gnome.shell.extensions.windows-search-provider",
   "name": "WSP (Windows Search Provider)",
@@ -10,5 +10,5 @@
   "url": "https://github.com/G-dH/windows-search-provider",
   "donations": {"buymeacoffee": "georgdh"},
   "uuid": "windows-search-provider@G-dH.github.com",
-  "version-name": "46.4"
+  "version-name": "46.5"
 }
