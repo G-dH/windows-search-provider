@@ -9,10 +9,11 @@
 
 'use strict';
 
-const  { GLib, Gio, GObject, Clutter, Meta, Shell, St } = imports.gi;
+const  { Clutter, Gio, GLib, GObject, Meta, Shell, St } = imports.gi;
 
 const Main = imports.ui.main;
 const Search = imports.ui.search;
+const { Highlighter } = imports.misc.util;
 
 const Action = {
     NONE: 0,
@@ -29,8 +30,9 @@ let _;
 let _toggleTimeout;
 
 // prefix helps to eliminate results from other search providers
-// so it needs to be something less common
+// this prefix is also used by the V-Shell to activate this provider
 const PREFIX = 'wq//';
+const ID = 'open-windows';
 
 var WindowsSearchProviderModule = class {
     constructor(me) {
@@ -64,7 +66,8 @@ var WindowsSearchProviderModule = class {
 
     _activateModule() {
         this._overrides = new Me.Util.Overrides();
-        this._overrides.addOverride('SearchResult', Search.SearchResult.prototype, SearchResultOverride);
+        this._overrides.addOverride('Highlighter', Highlighter.prototype, HighlighterOverride);
+        this._overrides.addOverride('ListSearchResult', Search.ListSearchResult.prototype, ListSearchResultOverride);
 
         // GNOME 43/44 has a problem registering a new provider during Shell's startup
         let delay = 0;
@@ -106,8 +109,10 @@ var WindowsSearchProviderModule = class {
         const searchResults = Main.overview._overview.controls._searchController._searchResults;
         provider.searchInProgress = false;
 
+        // _providers is the source for default result selection, so it has to match the order of displays
         // insert WSP after app search but above all other providers
-        searchResults._providers.splice(1, 0, provider);
+        let position = 1;
+        searchResults._providers.splice(position, 0, provider);
 
         // create results display and add it to the _content
         searchResults._ensureProviderDisplay.bind(searchResults)(provider);
@@ -117,7 +122,7 @@ var WindowsSearchProviderModule = class {
         // another way to move our provider up below the applications provider is reloading remote providers
         // searchResults._reloadRemoteProviders()
         searchResults._content.remove_child(provider.display);
-        searchResults._content.insert_child_at_index(provider.display, 1);
+        searchResults._content.insert_child_at_index(provider.display, position);
     }
 
     _unregisterProvider(provider) {
@@ -128,7 +133,7 @@ var WindowsSearchProviderModule = class {
 
 const WindowsSearchProvider = class WindowsSearchProvider {
     constructor() {
-        this.id = 'open-windows';
+        this.id = ID;
 
         const appInfo = Gio.AppInfo.create_from_commandline('/usr/bin/gnome-extensions-app', 'Extensions', null);
         appInfo.get_description = () => _('Search open windows');
@@ -147,6 +152,8 @@ const WindowsSearchProvider = class WindowsSearchProvider {
         this.closeAllResultsRegex = /^\/xa!$/;
         this.moveToWsRegex = /^\/m[0-9]+$/;
         this.moveAllToWsRegex = /^\/ma[0-9]+$/;
+
+        this._highlighter = new Highlighter();
     }
 
     getInitialResultSet(terms, callback, cancellable) {
@@ -184,22 +191,25 @@ const WindowsSearchProvider = class WindowsSearchProvider {
             }
         }
 
-        if (!prefix && opt.EXCLUDE_FROM_GLOBAL_SEARCH)
-            return new Map();
+        if (!prefix && opt.EXCLUDE_FROM_GLOBAL_SEARCH) {
+            const results = [];
+            this.resultIds = results.map(item => item.id);
+            return this.resultIds;
+        }
 
         this._listAllResults = !!prefix;
 
         // do not modify original terms
-        let termsCopy = [...terms];
+        let _terms = [...terms];
         // search for terms without prefix
-        termsCopy[0] = termsCopy[0].replace(prefix, '');
+        _terms[0] = _terms[0].replace(prefix, '');
 
         if (opt.COMMANDS_ENABLED) {
             this.action = 0;
             this.targetWs = null;
             this._commandUsed = false;
 
-            const lastTerm = termsCopy[termsCopy.length - 1];
+            const lastTerm = _terms[_terms.length - 1];
             if (lastTerm.match(this.closeSelectedRegex))
                 this.action = Action.CLOSE;
             else if (lastTerm.match(this.closeAllResultsRegex))
@@ -211,17 +221,17 @@ const WindowsSearchProvider = class WindowsSearchProvider {
 
             if (this.action) {
                 this._commandUsed = true;
-                termsCopy.pop();
+                _terms.pop();
                 if ([Action.MOVE_TO_WS, Action.MOVE_ALL_TO_WS].includes(this.action))
                     this.targetWs = parseInt(lastTerm.replace(/^[^0-9]+/, ''));
             } else if (lastTerm.startsWith('/')) {
-                termsCopy.pop();
+                _terms.pop();
             }
         }
 
         const candidates = this.windows;
-        const _terms = [].concat(termsCopy);
 
+        this._terms = _terms;
         const term = _terms.join(' ').trim();
 
         const results = [];
@@ -257,6 +267,9 @@ const WindowsSearchProvider = class WindowsSearchProvider {
 
         results.sort((a, b) => (_terms !== ' ') && (a.weight > 0 && b.weight === 0));
         this.resultIds = results.map(item => item.id);
+
+        this._updateHighlights();
+
         return this.resultIds;
     }
 
@@ -315,13 +328,26 @@ const WindowsSearchProvider = class WindowsSearchProvider {
         }
     }
 
+    // The default highligting is done on terms change
+    // but since we are modifying the terms, the highlighting needs to be done after that
+    // On first run the result displays are not yet created,
+    // so we also need this method to be called from each result display's constructor
+    _updateHighlights() {
+        const resultIds = this.resultIds;
+        // make the highlighter global, so it can be used from the result display
+        this._highlighter = new Highlighter(this._terms);
+        resultIds.forEach(value => {
+            this.display._resultDisplays[value]?._highlightTerms(this);
+        });
+    }
+
     launchSearch(terms, timeStamp) {
         if (this._listAllResults) {
             // launch Extensions app
             this.appInfo.launch([], global.create_app_launch_context(timeStamp, -1), null);
         } else {
             // update search so all results will be listed
-            // Main.overview._overview._controls._searchController._searchResults._reset();
+            Main.overview._overview._controls._searchController._searchResults._reset();
             Main.overview._overview.controls._searchEntry.set_text(`${PREFIX} ${terms}`);
             // cause an error so the overview will stay open
             this.dummyError();
@@ -381,9 +407,66 @@ const WindowsSearchProvider = class WindowsSearchProvider {
             selectedWin.activate(global.get_current_time());
         }
     }
+
+    createResultObject(meta) {
+        const searchResults = Main.overview._overview.controls._searchController._searchResults;
+        const lsr = new ListSearchResult(this, meta, searchResults);
+        return lsr;
+    }
 };
 
-const SearchResultOverride = {
+const ListSearchResult = GObject.registerClass(
+class ListSearchResult extends Search.SearchResult {
+    _init(provider, metaInfo, resultsView) {
+        super._init(provider, metaInfo, resultsView);
+
+        this.style_class = 'list-search-result';
+
+        let content = new St.BoxLayout({
+            style_class: 'list-search-result-content',
+            vertical: false,
+            x_align: Clutter.ActorAlign.START,
+            x_expand: true,
+            y_expand: true,
+        });
+        this.set_child(content);
+
+        let titleBox = new St.BoxLayout({
+            style_class: 'list-search-result-title',
+            y_align: Clutter.ActorAlign.CENTER,
+        });
+
+        content.add_child(titleBox);
+
+        // An icon for, or thumbnail of, content
+        let icon = this.metaInfo['createIcon'](this.ICON_SIZE);
+        if (icon)
+            titleBox.add(icon);
+
+        let title = new St.Label({
+            text: this.metaInfo['name'],
+            y_align: Clutter.ActorAlign.CENTER,
+        });
+        titleBox.add_child(title);
+
+        this.label_actor = title;
+
+        if (this.metaInfo['description']) {
+            this._descriptionLabel = new St.Label({
+                style_class: 'list-search-result-description',
+                y_align: Clutter.ActorAlign.CENTER,
+            });
+            content.add_child(this._descriptionLabel);
+        }
+
+        // The first highlight
+        this._highlightTerms(provider);
+    }
+
+    get ICON_SIZE() {
+        return 24;
+    }
+
     activate() {
         this.provider.activateResult(this.metaInfo.id, this._resultsView.terms);
 
@@ -391,9 +474,84 @@ const SearchResultOverride = {
             St.Clipboard.get_default().set_text(
                 St.ClipboardType.CLIPBOARD, this.metaInfo.clipboardText);
         }
+
         // Hold Alt to avoid leaving the overview
         // this works for actions that don't involve a window activation which closes the overview too
         if (!Me.Util.isAltPressed())
             Main.overview.toggle();
+    }
+
+    _highlightTerms(provider) {
+        let markup = provider._highlighter.highlight(this.metaInfo['name']);
+        this.label_actor.clutter_text.set_markup(markup);
+        markup = provider._highlighter.highlight(this.metaInfo['description'].split('\n')[0]);
+        this._descriptionLabel.clutter_text.set_markup(markup);
+    }
+});
+
+// Add highlighting of the "name" part of the result for all providers
+const ListSearchResultOverride = {
+    _highlightTerms() {
+        let markup = this._resultsView.highlightTerms(this.metaInfo['name']);
+        this.label_actor.clutter_text.set_markup(markup);
+        markup = this._resultsView.highlightTerms(this.metaInfo['description'].split('\n')[0]);
+        this._descriptionLabel.clutter_text.set_markup(markup);
+    },
+};
+
+const  HighlighterOverride = {
+    /**
+     * @param {?string[]} terms - list of terms to highlight
+     */
+    /* constructor(terms) {
+        if (!terms)
+            return;
+
+        const escapedTerms = terms
+            .map(term => Shell.util_regex_escape(term))
+            .filter(term => term.length > 0);
+
+        if (escapedTerms.length === 0)
+            return;
+
+        this._highlightRegex = new RegExp(
+            `(${escapedTerms.join('|')})`, 'gi');
+    },*/
+
+    /**
+     * Highlight all occurences of the terms defined for this
+     * highlighter in the provided text using markup.
+     *
+     * @param {string} text - text to highlight the defined terms in
+     * @returns {string}
+     */
+    highlight(text) {
+        if (!this._highlightRegex)
+            return GLib.markup_escape_text(text, -1);
+            // return GLib.markup_escape_text(` ${text}`, -1);
+
+        // add a space in front of the strings to work around the bug when highlighting matched strings using foreground-color
+        // Pango markup foreground-color doesn't apply to the first char for some reason in GNOME 42-46
+        // text = `${text}`;
+        let escaped = [];
+        let lastMatchEnd = 0;
+        let match;
+        while ((match = this._highlightRegex.exec(text))) {
+            if (match.index > lastMatchEnd) {
+                let unmatched = GLib.markup_escape_text(
+                    text.slice(lastMatchEnd, match.index), -1);
+                escaped.push(unmatched);
+            }
+            let matched = GLib.markup_escape_text(match[0], -1);
+            // The default highlighting by bold property causes text to be "randomly" ellipsized in cases where it's not necessary
+            // and also blurry
+            // Underscore doesn't affect label size and all looks better
+            escaped.push(`<u>${matched}</u>`);
+            lastMatchEnd = match.index + match[0].length;
+        }
+        let unmatched = GLib.markup_escape_text(
+            text.slice(lastMatchEnd), -1);
+        escaped.push(unmatched);
+        return escaped.join('');
     },
 };
