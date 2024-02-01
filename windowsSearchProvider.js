@@ -141,14 +141,17 @@ const WindowsSearchProvider = class WindowsSearchProvider {
     constructor() {
         this.id = ID;
 
-        const appInfo = Gio.AppInfo.create_from_commandline('/usr/bin/gnome-extensions-app', 'Extensions', null);
-        appInfo.get_description = () => _('Search open windows');
-        appInfo.get_name = () => _('Open Windows');
-        appInfo.get_id = () => 'org.gnome.Extensions.desktop';
-        appInfo.get_icon = () => Gio.icon_new_for_string('focus-windows-symbolic');
-        appInfo.should_show = () => true;
+        // A real appInfo created from a commandline has often issues with overriding get_id() method, so we use dict instead
+        this.appInfo = {
+            get_name: () => _('Open Windows'),
+            get_id: () => 'org.gnome.Nautilus.desktop', // id of an app that is usually installed to avoid error messages
+            get_icon: () => Gio.icon_new_for_string('focus-windows-symbolic'),
+            should_show: () => true,
+            launch: () => {
+                Me.Util.openPreferences(Me.metadata);
+            },
+        };
 
-        this.appInfo = appInfo;
         this.canLaunchSearch = true;
         this.isRemoteProvider = false;
 
@@ -333,13 +336,14 @@ const WindowsSearchProvider = class WindowsSearchProvider {
         });
     }
 
-    launchSearch(terms, timeStamp) {
+    launchSearch(terms/* , timeStamp*/) {
         if (this._listAllResults) {
             // launch Extensions app
-            this.appInfo.launch([], global.create_app_launch_context(timeStamp, -1), null);
+            this.appInfo.launch();
         } else {
             // update search so all results will be listed
-            Main.overview._overview._controls._searchController._searchResults._reset();
+            // Main.overview._overview._controls._searchController._searchResults._reset();
+            // Show complete list
             Main.overview._overview.controls._searchEntry.set_text(`${PREFIX} ${terms}`);
             // cause an error so the overview will stay open
             this.dummyError();
