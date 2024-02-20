@@ -17,6 +17,9 @@
     <key name='dash-icon-position' type='i'>
       <default>1</default>
     </key>
+    <key name='highlighting-style' type='i'>
+      <default>1</default>
+    </key>
     <key name='search-commands' type='b'>
       <default>false</default>
     </key>

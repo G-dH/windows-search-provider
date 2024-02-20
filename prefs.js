@@ -17,7 +17,7 @@ const Settings = MyExtension.imports.settings;
 let _;
 
 function init() {
-
+    ExtensionUtils.initTranslations(MyExtension.metadata['gettext-domain']);
 }
 
 function fillPreferencesWindow(window) {
@@ -130,6 +130,20 @@ class ESP {
                     [_('MRU - Current Workspace First'), 1],
                     [_('MRU - By Workspaces'), 2],
                     [_('Stable Sequence - By Workspaces'), 3],
+                ]
+            )
+        );
+
+        optionList.push(
+            itemFactory.getRowWidget(
+                _('Highlighting'),
+                _('The GNOME default highlighting style (bold) causes strings to be "randomly" ellipsized, often preventing you from seeing the whole string, even if there is space for it. The selected style will be applied to all search results globally. If you are using other extensions that offer this option, make sure you set the same setting in all of them.'),
+                itemFactory.newDropDown(),
+                'highlightingStyle',
+                [
+                    [_('Bold (GNOME Default)'), 0],
+                    [_('Underline'), 1],
+                    [_('None'), 2],
                 ]
             )
         );
