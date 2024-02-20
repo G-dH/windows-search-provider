@@ -125,6 +125,20 @@ export default class ESP extends ExtensionPreferences {
 
         optionList.push(
             itemFactory.getRowWidget(
+                _('Highlighting'),
+                _('The GNOME default highlighting style (bold) causes strings to be "randomly" ellipsized, often preventing you from seeing the whole string, even if there is space for it. The selected style will be applied to all search results globally. If you are using other extensions that offer this option, make sure you set the same setting in all of them.'),
+                itemFactory.newDropDown(),
+                'highlightingStyle',
+                [
+                    [_('Bold (GNOME Default)'), 0],
+                    [_('Underline'), 1],
+                    [_('None'), 2],
+                ]
+            )
+        );
+
+        optionList.push(
+            itemFactory.getRowWidget(
                 _('Enable Search Commands'),
                 _('Enables for using commands separated by a space at the end of the search pattern\n\n/x!   \t\t\t- close selected window\n/xa! \t\t\t- close all displayed results\n/m[index] \t\t- (e.g. /m6) move selected window to the workspace with the given index\n/ma[index] \t\t- move all displayed results to the workspace with the given index'),
                 itemFactory.newSwitch(),

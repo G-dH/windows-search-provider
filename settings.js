@@ -41,6 +41,7 @@ export const Options = class Options {
             resultsOrder:            ['int', 'results-order'],
             searchMethod:            ['int', 'search-method'],
             dashIconPosition:        ['int', 'dash-icon-position'],
+            highlightingStyle:       ['int', 'highlighting-style'],
             searchCommands:          ['boolean', 'search-commands'],
         };
 
@@ -116,6 +117,10 @@ export const Options = class Options {
         this.REG_EXP_INSENSITIVE_MATCH   = this.SEARCH_METHOD === 3;
         this.DASH_ICON_POSITION          = this.get('dashIconPosition');
         this.DASH_ICON_HIDEN             = !this.DASH_ICON_POSITION;
+        this.HIGHLIGHTING_STYLE          = this.get('highlightingStyle');
+        this.HIGHLIGHT_DEFAULT           = this.HIGHLIGHTING_STYLE === 0;
+        this.HIGHLIGHT_UNDERLINE         = this.HIGHLIGHTING_STYLE === 1;
+        this.HIGHLIGHT_NONE              = this.HIGHLIGHTING_STYLE === 2;
         this.COMMANDS_ENABLED            = this.get('searchCommands');
     }
 };
