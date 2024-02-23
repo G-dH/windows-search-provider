@@ -1,9 +1,9 @@
 /**
- * WSM - Workspace Switcher Manager
+ * WSP (Windows Search Provider)
  * settings.js
  *
  * @author     GdH <G-dH@github.com>
- * @copyright  2022 - 2024
+ * @copyright  2024
  * @license    GPL-3.0
  */
 
