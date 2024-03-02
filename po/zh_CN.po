@@ -1,0 +1,236 @@
+# Chinese translations for windows-search-provider package
+# windows-search-provider 软件包的简体中文翻译.
+# Copyright (C) 2024 GdH
+# This file is distributed under the same license as the windows-search-provider package.
+#  <yuhldr@qq.com>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: windows-search-provider\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-03-02 19:19+0800\n"
+"PO-Revision-Date: 2024-03-02 19:23+0800\n"
+"Last-Translator:  <yuhldr@qq.com>\n"
+"Language-Team: Chinese (simplified) <i18n-zh@googlegroups.com>\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: optionsFactory.js:288
+msgid "Reset profile to defaults"
+msgstr "将配置文件重置为默认设置"
+
+#: optionsFactory.js:296
+msgid "GNOME 3"
+msgstr ""
+
+#: optionsFactory.js:297
+msgid "GNOME 40+ - Bottom Hot Edge"
+msgstr "GNOME 40+ - 底部热区边缘"
+
+#: optionsFactory.js:298
+msgid "Hot Corner Centric - Top Left Hot Corner"
+msgstr "中心热区 - 左上角热区"
+
+#: optionsFactory.js:299
+msgid "Dock Overview - Bottom Hot Edge"
+msgstr "Dock预览-底部热区"
+
+#: optionsFactory.js:321
+msgid "Load profile"
+msgstr "载入配置"
+
+#: optionsFactory.js:330
+msgid "Save current settings into this profile"
+msgstr "将当前设置保存到此配置文件中"
+
+#: prefs.js:26
+msgid "Options"
+msgstr "选项"
+
+#: prefs.js:32
+msgid "About"
+msgstr "关于"
+
+#: prefs.js:80
+msgid "Custom Search Prefixes"
+msgstr "自定义搜索前缀"
+
+#: prefs.js:81
+msgid ""
+"Strings separated by space. The search prefix is a character/string added in "
+"front of the searched pattern (optionally followed by a space), serving as "
+"both a blocker for other search providers and a command to WSP to list all "
+"results instead of the default, limited to 5 results. The default fixed "
+"search prefix is \"wq//\""
+msgstr ""
+"用空格分隔的字符串。搜索前缀是添加在搜索模式前面的字符/字符串(可选后跟空格)，既是其他搜索提供商的拦截器，也是WSP列出所有结果的命令，而不是默认结果，限制为5个结果。默认固定的搜索前缀是\"wq//\""
+
+#: prefs.js:89
+msgid "Search Method"
+msgstr "搜索方法"
+
+#: prefs.js:90
+msgid ""
+"Choose how WSP will use the entered pattern. The \"Strict\" and \"Fuzzy\" "
+"options allow you to enter multiple strings separated by a space in any "
+"order, the input is case insensitive and accents are ignored. The \"Fuzzy\" "
+"match enables you to skip letters in the pattern, so you can find \"V-"
+"Shell\" even if you enter \"vll\" With the \"Regular Expression\" options, "
+"WSP will treat the entry as a regular expression for JavaScript\""
+msgstr ""
+"选择WSP将如何使用输入的模式。使用\"Strict\"和\"Fuzzy\"选项，您可以按任何顺序输入由空格分隔的多个字符串，输入不区分大小写，并且忽略重音。\"Fuzzy\"匹配使您可以跳过模式中的字母，因此，即使您输入的是包含正则表达式选项的\"vll\"，WSP也会将该条目视为正则表达式来处理"
+
+#: prefs.js:94
+msgid "Strict"
+msgstr "严格"
+
+#: prefs.js:95
+msgid "Fuzzy"
+msgstr "模糊"
+
+#: prefs.js:96
+msgid "Regular Expression - Case Sensitive"
+msgstr "正则表达式-区分大小写"
+
+#: prefs.js:97
+msgid "Regular Expression - Case Insensitive"
+msgstr "正则表达式-不区分大小写"
+
+#: prefs.js:104
+msgid "Exclude Results From Global Search"
+msgstr "从全局搜索中排除结果"
+
+#: prefs.js:105
+msgid ""
+"Show results only if a search prefix is used, so that WSP results do not "
+"clutter the global search"
+msgstr ""
+"仅当使用搜索前缀时才显示结果，以便WSP结果不会使全局搜索变得混乱"
+
+#: prefs.js:113
+msgid "Sorting"
+msgstr "排序中"
+
+#: prefs.js:114
+msgid "Order of windows in the complete list when using a search prefix alone"
+msgstr "单独使用搜索前缀时完整列表中窗口的顺序"
+
+#: prefs.js:118
+msgid "Most Recently Used (MRU)"
+msgstr "最近使用(MRU)"
+
+#: prefs.js:119
+msgid "MRU - Current Workspace First"
+msgstr "MRU-当前工作空间优先"
+
+#: prefs.js:120
+msgid "MRU - By Workspaces"
+msgstr "MRU-通过工作区"
+
+#: prefs.js:121
+msgid "Stable Sequence - By Workspaces"
+msgstr "稳定的顺序-按工作空间"
+
+#: prefs.js:128
+msgid "Highlighting"
+msgstr "高亮"
+
+#: prefs.js:129
+msgid ""
+"The GNOME default highlighting style (bold) causes strings to be "
+"\"randomly\" ellipsized, often preventing you from seeing the whole string, "
+"even if there is space for it. The selected style will be applied to all "
+"search results globally. If you are using other extensions that offer this "
+"option, make sure you set the same setting in all of them."
+msgstr ""
+"GNOME默认的突出显示样式(粗体)会导致字符串\"randomly\"省略，通常会阻止您看到整个字符串，即使有空间也是如此。选定的样式将全局应用于所有搜索结果。如果您正在使用提供此选项的其他扩展，请确保在所有扩展中设置相同的设置。"
+
+#: prefs.js:133
+msgid "Bold (GNOME Default)"
+msgstr "粗体(GNOME默认设置)"
+
+#: prefs.js:134
+msgid "Underline"
+msgstr "下划线"
+
+#: prefs.js:135
+msgid "None"
+msgstr "无"
+
+#: prefs.js:142
+msgid "Enable Search Commands"
+msgstr "启用搜索命令"
+
+#: prefs.js:143
+msgid ""
+"Enables for using commands separated by a space at the end of the search "
+"pattern\n"
+"\n"
+"/x!   \t\t\t- close selected window\n"
+"/xa! \t\t\t- close all displayed results\n"
+"/m[index] \t\t- (e.g. /m6) move selected window to the workspace with the "
+"given index\n"
+"/ma[index] \t\t- move all displayed results to the workspace with the given "
+"index"
+msgstr ""
+"允许使用在搜索模式末尾用空格分隔的命令\n"
+"\n"
+"/x!   \t\t\t- 关闭选定窗口\n"
+"/xa! \t\t\t- 关闭所有显示的结果\n"
+"/m[index] \t\t- (例如/m6) 移动被选中的窗口到给定索引的工作区\n"
+"/ma[index] \t\t- 将所有显示的结果移动到给定索引的工作区"
+
+#: prefs.js:178
+msgid "Version"
+msgstr "版本"
+
+#: prefs.js:184
+msgid "Reset all options"
+msgstr "重置所有选项"
+
+#: prefs.js:185
+msgid "Set all options to default values."
+msgstr "将所有选项设置为默认值。"
+
+#: prefs.js:191
+msgid "Links"
+msgstr "链接"
+
+#: prefs.js:195
+msgid "Homepage"
+msgstr "主页"
+
+#: prefs.js:196
+msgid "Source code and more info about this extension"
+msgstr "源代码和有关此扩展的更多信息"
+
+#: prefs.js:207
+msgid "GNOME Extensions"
+msgstr "GNOME扩展"
+
+#: prefs.js:208
+msgid "Rate and comment WSP on the GNOME Extensions site"
+msgstr "在GNOME扩展站点上对WSP进行评级和评论"
+
+#: prefs.js:213
+msgid "Report a bug or suggest new feature"
+msgstr "报告错误或建议新功能"
+
+#: prefs.js:214
+msgid "Help me to help you!"
+msgstr "帮帮我，也帮你！"
+
+#: prefs.js:219
+msgid "Buy Me a Coffee"
+msgstr "给我买咖啡"
+
+#: prefs.js:220
+msgid "Enjoying WSP? Consider supporting it by buying me a coffee!"
+msgstr "享受WSP吗？请我喝杯咖啡吧！"
+
+#: windowsSearchProvider.js:146
+msgid "Open Windows"
+msgstr "打开窗口"
+
