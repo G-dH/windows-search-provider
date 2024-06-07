@@ -1,0 +1,69 @@
+/*
+* wsp (Extensions Search Provider)
+* stylesheet.css
+*/
+
+.list-search-results {
+    spacing: 2px;
+}
+
+/* reduce padding to compensate for button style */
+.wsp-list-search-result {
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+.wsp-button,
+.wsp-info-button,
+.wsp-info-button-alert,
+.wsp-button-alert,
+.wsp-button-trash {
+    border: 1px solid rgba(200,200,200,0.2);
+    padding: 4px;
+    border-radius: 8px;
+}
+
+.wsp-control-box {
+    spacing: 6px;
+}
+
+.wsp-info-button,
+.wsp-info-button-alert {
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.wsp-button-alert,
+.wsp-info-button-alert,
+.wsp-button-trash:hover {
+    color: red;
+}
+
+.wsp-button:hover,
+.wsp-button-trash:hover {
+    background-color: rgba(180, 180, 180, 0.2);
+}
+
+.wsp-icon {
+    padding: 4px;
+}
+
+.wsp-info-box-button,
+.wsp-error {
+    padding: 8px;
+    border-radius: 8px;
+    word-wrap: break-word;
+    text-align: left;
+    overflow: hidden;
+    margin-top: 4px;
+    border: 1px solid rgba(200,200,200,0.2);
+    background-color: rgba(20, 20, 20, 0.2);
+}
+
+.wsp-info-box-button:hover {
+    background-color: rgba(20, 20, 20, 0.5);
+}
+
+.wsp-error {
+    background-color: rgba(200, 0, 0, 0.7);
+}

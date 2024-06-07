@@ -26,7 +26,7 @@ export default class WSP extends Extension.Extension {
         Me.gSettings = this.getSettings();
         Me.Settings = Settings;
         Me.Util = Util;
-        Me.gettext = this.gettext.bind(this);
+        Me._ = this.gettext.bind(this);
 
         Me.opt = new Me.Settings.Options(Me);
 

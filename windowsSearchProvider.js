@@ -9,17 +9,17 @@
 
 'use strict';
 
-import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
-import GObject from 'gi://GObject';
 import Meta from 'gi://Meta';
 import Shell from 'gi://Shell';
 import St from 'gi://St';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
-import * as Search from 'resource:///org/gnome/shell/ui/search.js';
 import { Highlighter } from 'resource:///org/gnome/shell/misc/util.js';
+
+import * as ListSearchResult from './listSearchResult.js';
+import * as DashIcon from './dashIcon.js';
 
 const Action = {
     NONE: 0,
@@ -44,15 +44,17 @@ export const WindowsSearchProviderModule = class {
     constructor(me) {
         Me = me;
         opt = Me.opt;
-        _  = Me.gettext;
+        _  = Me._;
+        Me.PREFIX = PREFIX;
+        Me.Action = Action;
 
-        this._firstActivation = true;
-        this.moduleEnabled = false;
+        ListSearchResult.init(Me);
         this._windowsSearchProvider = null;
         this._enableTimeoutId = 0;
     }
 
     cleanGlobals() {
+        ListSearchResult.cleanGlobals();
         Me = null;
         opt = null;
         _ = null;
@@ -71,9 +73,7 @@ export const WindowsSearchProviderModule = class {
     }
 
     _activateModule() {
-        this._overrides = new Me.Util.Overrides();
-        this._overrides.addOverride('Highlighter', Highlighter.prototype, HighlighterOverride);
-        this._overrides.addOverride('ListSearchResult', Search.ListSearchResult.prototype, ListSearchResultOverride);
+        Me._overrides = new Me.Util.Overrides();
 
         // delay to ensure that all default providers are already registered
         let delay = 0;
@@ -92,7 +92,10 @@ export const WindowsSearchProviderModule = class {
             }
         );
 
-        console.debug('  WindowsSearchProviderModule - Activated');
+        this._dashOpenWindowsIcon = new DashIcon.DashOpenWindowsIcon(Me);
+        Me.opt.connect('changed::dash-icon-position', () => this._dashOpenWindowsIcon.updateIcon());
+
+        console.debug('WindowsSearchProviderModule - Activated');
     }
 
     _disableModule() {
@@ -105,10 +108,13 @@ export const WindowsSearchProviderModule = class {
             this._windowsSearchProvider = null;
         }
 
-        this._overrides.removeAll();
-        this._overrides = null;
+        this._dashOpenWindowsIcon.destroy();
+        this._dashOpenWindowsIcon = null;
 
-        console.debug('  WindowsSearchProviderModule - Disabled');
+        Me._overrides.removeAll();
+        Me._overrides = null;
+
+        console.debug('WindowsSearchProviderModule - Disabled');
     }
 
     _registerProvider(provider) {
@@ -179,7 +185,7 @@ const WindowsSearchProvider = class WindowsSearchProvider {
     }
 
     _getResultSet(terms) {
-        const prefixes = [PREFIX];
+        const prefixes = [Me.PREFIX];
         prefixes.push(...opt.CUSTOM_PREFIXES);
 
         let prefix;
@@ -204,8 +210,8 @@ const WindowsSearchProvider = class WindowsSearchProvider {
         // search for terms without prefix
         _terms[0] = _terms[0].replace(prefix, '');
 
+        this.action = 0;
         if (opt.COMMANDS_ENABLED) {
-            this.action = 0;
             this.targetWs = null;
             this._commandUsed = false;
 
@@ -344,7 +350,7 @@ const WindowsSearchProvider = class WindowsSearchProvider {
             // update search so all results will be listed
             // Main.overview._overview._controls._searchController._searchResults._reset();
             // Show complete list
-            Main.overview._overview.controls._searchEntry.set_text(`${PREFIX} ${terms}`);
+            Main.overview._overview.controls._searchEntry.set_text(`${Me.PREFIX} ${terms}`);
             // cause an error so the overview will stay open
             this.dummyError();
         }
@@ -353,11 +359,14 @@ const WindowsSearchProvider = class WindowsSearchProvider {
     activateResult(resultId/* , terms, timeStamp*/) {
         const ctrlPressed = Me.Util.isCtrlPressed();
         const shiftPressed = Me.Util.isShiftPressed();
+        const altPressed = Me.Util.isAltPressed();
 
         if (!this._commandUsed && shiftPressed && !ctrlPressed)
             this.action = Action.MOVE_TO_WS;
         else if (!this._commandUsed && shiftPressed && ctrlPressed)
             this.action = Action.MOVE_ALL_TO_WS;
+        else if (!this._commandUsed && altPressed && ctrlPressed && !shiftPressed)
+            this.action = Action.CLOSE;
 
         if (!this.action) {
             const result = this.windows[resultId];
@@ -386,7 +395,8 @@ const WindowsSearchProvider = class WindowsSearchProvider {
         for (let i = 0; i < ids.length; i++)
             this.windows[ids[i]].window.delete(time + i);
 
-        Main.notify('Window Search Provider', `Closed ${ids.length} windows.`);
+        if (ids.length > 1)
+            Main.notify('Window Search Provider', `Closed ${ids.length} windows.`);
     }
 
     _moveWindowsToWs(selectedId, resultIds) {
@@ -406,150 +416,7 @@ const WindowsSearchProvider = class WindowsSearchProvider {
 
     createResultObject(meta) {
         const searchResults = Main.overview.searchController._searchResults;
-        const lsr = new ListSearchResult(this, meta, searchResults);
+        const lsr = new ListSearchResult.ListSearchResult(this, meta, searchResults);
         return lsr;
     }
-};
-
-const ListSearchResult = GObject.registerClass(
-class ListSearchResult extends Search.SearchResult {
-    _init(provider, metaInfo, resultsView) {
-        super._init(provider, metaInfo, resultsView);
-        this.style_class = 'list-search-result';
-
-        let content = new St.BoxLayout({
-            style_class: 'list-search-result-content',
-            vertical: false,
-            x_align: Clutter.ActorAlign.START,
-            x_expand: true,
-            y_expand: true,
-        });
-        this.set_child(content);
-
-        let titleBox = new St.BoxLayout({
-            style_class: 'list-search-result-title',
-            y_align: Clutter.ActorAlign.CENTER,
-        });
-
-        content.add_child(titleBox);
-        // An icon for, or thumbnail of, content
-        let icon = this.metaInfo['createIcon'](this.ICON_SIZE);
-        if (icon)
-            titleBox.add_child(icon);
-        let title = new St.Label({
-            text: this.metaInfo['name'],
-            y_align: Clutter.ActorAlign.CENTER,
-        });
-        titleBox.add_child(title);
-
-        this.label_actor = title;
-        if (this.metaInfo['description']) {
-            this._descriptionLabel = new St.Label({
-                text: this.metaInfo['description'],
-                style_class: 'list-search-result-description',
-                y_align: Clutter.ActorAlign.CENTER,
-            });
-            content.add_child(this._descriptionLabel);
-        }
-
-        this._highlightTerms(provider);
-    }
-
-    get ICON_SIZE() {
-        return 24;
-    }
-
-    activate() {
-        this.provider.activateResult(this.metaInfo.id, this._resultsView.terms);
-
-        if (this.metaInfo.clipboardText) {
-            St.Clipboard.get_default().set_text(
-                St.ClipboardType.CLIPBOARD, this.metaInfo.clipboardText);
-        }
-
-        // Hold Alt to avoid leaving the overview
-        // this works for actions that don't involve a window activation which closes the overview too
-        if (!Me.Util.isAltPressed())
-            Main.overview.toggle();
-    }
-
-    _highlightTerms(provider) {
-        // Unfortunately, highlighting causes text to be "randomly" ellipsized in cases where it's not necessary
-        opt.HIGHLIGHT = true;
-        if (opt.HIGHLIGHT) {
-            let markup = provider._highlighter.highlight(this.metaInfo['name']);
-            this.label_actor.clutter_text.set_markup(markup);
-            markup = provider._highlighter.highlight(this.metaInfo['description'].split('\n')[0]);
-            this._descriptionLabel.clutter_text.set_markup(markup);
-        }
-    }
-});
-
-// Add highlighting of the "name" part of the result for all providers
-const ListSearchResultOverride = {
-    _highlightTerms() {
-        let markup = this._resultsView.highlightTerms(this.metaInfo['name']);
-        this.label_actor.clutter_text.set_markup(markup);
-        markup = this._resultsView.highlightTerms(this.metaInfo['description'].split('\n')[0]);
-        this._descriptionLabel.clutter_text.set_markup(markup);
-    },
-};
-
-const  HighlighterOverride = {
-    /**
-     * @param {?string[]} terms - list of terms to highlight
-     */
-    /* constructor(terms) {
-        if (!terms)
-            return;
-
-        const escapedTerms = terms
-            .map(term => Shell.util_regex_escape(term))
-            .filter(term => term.length > 0);
-
-        if (escapedTerms.length === 0)
-            return;
-
-        this._highlightRegex = new RegExp(
-            `(${escapedTerms.join('|')})`, 'gi');
-    },*/
-
-    /**
-     * Highlight all occurences of the terms defined for this
-     * highlighter in the provided text using markup.
-     *
-     * @param {string} text - text to highlight the defined terms in
-     * @returns {string}
-     */
-    highlight(text) {
-        if (!this._highlightRegex)
-            return GLib.markup_escape_text(text, -1);
-
-        let escaped = [];
-        let lastMatchEnd = 0;
-        let match;
-        let style = ['', ''];
-        if (opt.HIGHLIGHT_DEFAULT)
-            style = ['<b>', '</b>'];
-        // The default highlighting by the bold style causes text to be "randomly" ellipsized in cases where it's not necessary
-        // and also blurry
-        // Underscore doesn't affect label size and all looks better
-        else if (opt.HIGHLIGHT_UNDERLINE)
-            style = ['<u>', '</u>'];
-
-        while ((match = this._highlightRegex.exec(text))) {
-            if (match.index > lastMatchEnd) {
-                let unmatched = GLib.markup_escape_text(
-                    text.slice(lastMatchEnd, match.index), -1);
-                escaped.push(unmatched);
-            }
-            let matched = GLib.markup_escape_text(match[0], -1);
-            escaped.push(`${style[0]}${matched}${style[1]}`);
-            lastMatchEnd = match.index + match[0].length;
-        }
-        let unmatched = GLib.markup_escape_text(
-            text.slice(lastMatchEnd), -1);
-        escaped.push(unmatched);
-        return escaped.join('');
-    },
 };

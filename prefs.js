@@ -86,25 +86,15 @@ export default class ESP extends ExtensionPreferences {
 
         optionList.push(
             itemFactory.getRowWidget(
-                _('Search Method'),
-                _('Choose how WSP will use the entered pattern. The "Strict" and "Fuzzy" options allow you to enter multiple strings separated by a space in any order, the input is case insensitive and accents are ignored. The "Fuzzy" match enables you to skip letters in the pattern, so you can find "V-Shell" even if you enter "vll" With the "Regular Expression" options, WSP will treat the entry as a regular expression for JavaScript"'),
+                _('WSP Icon Position'),
+                _('Allows to add "Search Open Windows" icon into Dash so you can directly toggle all window search provider results'),
                 itemFactory.newDropDown(),
-                'searchMethod',
+                'dashIconPosition',
                 [
-                    [_('Strict'), 0],
-                    [_('Fuzzy'), 1],
-                    [_('Regular Expression - Case Sensitive'), 2],
-                    [_('Regular Expression - Case Insensitive'), 3],
+                    [_('Hide'), 0],
+                    [_('Start'), 1],
+                    [_('End'), 2],
                 ]
-            )
-        );
-
-        optionList.push(
-            itemFactory.getRowWidget(
-                _('Exclude Results From Global Search'),
-                _('Show results only if a search prefix is used, so that WSP results do not clutter the global search'),
-                itemFactory.newSwitch(),
-                'excludeFromGlobalSearch'
             )
         );
 
@@ -125,15 +115,10 @@ export default class ESP extends ExtensionPreferences {
 
         optionList.push(
             itemFactory.getRowWidget(
-                _('Highlighting'),
-                _('The GNOME default highlighting style (bold) causes strings to be "randomly" ellipsized, often preventing you from seeing the whole string, even if there is space for it. The selected style will be applied to all search results globally. If you are using other extensions that offer this option, make sure you set the same setting in all of them.'),
-                itemFactory.newDropDown(),
-                'highlightingStyle',
-                [
-                    [_('Bold (GNOME Default)'), 0],
-                    [_('Underline'), 1],
-                    [_('None'), 2],
-                ]
+                _('Exclude Results From Global Search'),
+                _('Show results only if a search prefix is used, so that WSP results do not clutter the global search'),
+                itemFactory.newSwitch(),
+                'excludeFromGlobalSearch'
             )
         );
 
@@ -146,19 +131,34 @@ export default class ESP extends ExtensionPreferences {
             )
         );
 
-        /* optionList.push(
+        optionList.push(
             itemFactory.getRowWidget(
-                _('WSP Icon Position'),
-                _('Allows to add "Search Open Windows" icon into Dash so you can directly toggle extensions search provider results'),
+                _('Search Method'),
+                _('Choose how WSP will use the entered pattern. The "Strict" and "Fuzzy" options allow you to enter multiple strings separated by a space in any order, the input is case insensitive and accents are ignored. The "Fuzzy" match enables you to skip letters in the pattern, so you can find "V-Shell" even if you enter "vll". With the "Regular Expression" options, WSP will treat the entry as a regular expression for JavaScript"'),
                 itemFactory.newDropDown(),
-                'dashIconPosition',
+                'searchMethod',
                 [
-                    [_('Hide'), 0],
-                    [_('Start'), 1],
-                    [_('End'), 2],
+                    [_('Strict'), 0],
+                    [_('Fuzzy'), 1],
+                    [_('Regular Expression - Case Sensitive'), 2],
+                    [_('Regular Expression - Case Insensitive'), 3],
                 ]
             )
-        );*/
+        );
+
+        optionList.push(
+            itemFactory.getRowWidget(
+                _('Highlighting'),
+                _('The GNOME default highlighting style (bold) causes strings to be "randomly" ellipsized, often preventing you from seeing the whole string, even if there is space for it. The selected style will be applied to all search results globally. If you are using other extensions that offer this option, make sure you set the same setting in all of them.'),
+                itemFactory.newDropDown(),
+                'highlightingStyle',
+                [
+                    [_('Bold (GNOME Default)'), 0],
+                    [_('Underline'), 1],
+                    [_('None'), 2],
+                ]
+            )
+        );
 
         return optionList;
     }
