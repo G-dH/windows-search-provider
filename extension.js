@@ -23,14 +23,14 @@ function init() {
 
 class ESP {
     enable() {
-        const Me = {};
+        const Me = MyExtension;
 
         // Me.getSettings = ExtensionUtils.getSettings;
         Me.metadata = MyExtension.metadata;
         Me.gSettings = ExtensionUtils.getSettings(Me.metadata['settings-schema']);
         Me.Settings = Settings;
         Me.Util = Util;
-        Me.gettext = imports.gettext.domain(Me.metadata['gettext-domain']).gettext;
+        Me._ = imports.gettext.domain(Me.metadata['gettext-domain']).gettext;
 
         Me.opt = new Me.Settings.Options(Me);
 
@@ -49,7 +49,7 @@ class ESP {
         this.Me.opt = null;
         this.Me.Util.cleanGlobals();
         this.Me = null;
-        this._esp = null;
+        this._wsp = null;
 
         console.debug(`${MyExtension.metadata.name}: disabled`);
     }
