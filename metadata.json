@@ -5,7 +5,8 @@
   "name": "WSP (Windows Search Provider)",
   "shell-version": [
     "45",
-    "46"
+    "46",
+    "47"
   ],
   "url": "https://github.com/G-dH/windows-search-provider",
   "donations": {"buymeacoffee": "georgdh"},
