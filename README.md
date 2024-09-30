@@ -4,7 +4,7 @@ A GNOME Shell extension that allows you to search and organize open windows from
 WSP is supported by the V-Shell extension which allows you to toggle the window search using the Space key in activities overview or by clicking on the dedicated icon in the dash.
 
 ## Features
-- Supports GNOME Shell 42 - 46
+- Supports GNOME Shell 42 - 47
 - Open windows can be added to the top of the global search results
 - Adding a customizable prefix in front of the search pattern allows you to display an isolated window search view with a complete list of open windows
 - Strict, Fuzzy and RegExp search methods
