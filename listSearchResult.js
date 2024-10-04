@@ -20,6 +20,7 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 let Me;
 let opt;
 let _;
+let timeout;
 
 export function init(me) {
     Me = me;
@@ -31,6 +32,10 @@ export function cleanGlobals() {
     Me = null;
     _ = null;
     opt = null;
+    if (timeout) {
+        GLib.source_remove(timeout);
+        timeout = 0;
+    }
 }
 
 export const ListSearchResult = GObject.registerClass({
@@ -158,15 +163,19 @@ export const ListSearchResult = GObject.registerClass({
         }
 
         // Hold Alt to avoid leaving the overview
-        // this works for actions that don't involve a window activation which closes the overview too
+        // this works for actions that don't involve a window activation, which closes the overview
         if (hideOverview) {
             Main.overview.hide();
         } else {
             const text = Main.overview.searchEntry.text;
-            GLib.timeout_add(GLib.PRIORITY_LOW, 200, () => {
+            Main.overview.searchEntry.text = `${text}?*?`;
+            if (timeout)
+                GLib.source_remove(timeout);
+            timeout = GLib.timeout_add(GLib.PRIORITY_LOW, 200, () => {
                 Main.overview.searchController._searchResults._reset();
-                Main.overview.searchEntry.text = `${text}?*?`;
                 Main.overview.searchEntry.text = text;
+                timeout = 0;
+                return GLib.SOURCE_REMOVE;
             });
         }
     }
