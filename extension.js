@@ -20,6 +20,10 @@ import * as Util from './util.js';
 export default class WSP extends Extension.Extension {
     enable() {
         const Me = {};
+        Me.providerId = 'open-windows';
+        // prefix helps to eliminate results from other search providers
+        // this prefix is also used by the V-Shell to activate this provider
+        Me.defaultPrefix = 'wq//';
 
         Me.getSettings = this.getSettings.bind(this);
         Me.metadata = this.metadata;

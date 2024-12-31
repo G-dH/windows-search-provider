@@ -70,7 +70,7 @@ export class DashOpenWindowsIcon {
 
         if (dash._showWindowsIcon && !dash._showWindowsIconClickedId) {
             dash._showWindowsIconClickedId = dash._showWindowsIcon.toggleButton.connect('clicked', () => {
-                this._activateSearchProvider(Me.PREFIX);
+                this._activateSearchProvider(Me.defaultPrefix);
             });
         }
 
