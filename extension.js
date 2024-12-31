@@ -24,6 +24,10 @@ function init() {
 class ESP {
     enable() {
         const Me = MyExtension;
+        Me.providerId = 'open-windows';
+        // prefix helps to eliminate results from other search providers
+        // this prefix is also used by the V-Shell to activate this provider
+        Me.defaultPrefix = 'wq//';
 
         // Me.getSettings = ExtensionUtils.getSettings;
         Me.metadata = MyExtension.metadata;
@@ -31,15 +35,14 @@ class ESP {
         Me.Settings = Settings;
         Me.Util = Util;
         Me._ = imports.gettext.domain(Me.metadata['gettext-domain']).gettext;
-
         Me.opt = new Me.Settings.Options(Me);
-
-        this.Me = Me;
 
         this._wsp = new WindowsSearchProviderModule(Me);
         this._wsp.update();
 
-        console.debug(`${MyExtension.metadata.name}: enabled`);
+        this.Me = Me;
+
+        log(`${MyExtension.metadata.name}: enabled`);
     }
 
     disable() {
@@ -51,6 +54,6 @@ class ESP {
         this.Me = null;
         this._wsp = null;
 
-        console.debug(`${MyExtension.metadata.name}: disabled`);
+        log(`${MyExtension.metadata.name}: disabled`);
     }
 }
