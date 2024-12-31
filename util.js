@@ -84,14 +84,10 @@ var Overrides = class {
                 backup[actualSymbol] = fn;
             } else {
                 backup[symbol] = proto[symbol];
-                if (symbol.startsWith('vfunc')) {
-                    if (Me.shellVersion < 42)
-                        this.hookVfunc(proto, symbol.slice(6), overrides[symbol]);
-                    else
-                        this.hookVfunc(proto[Gi.gobject_prototype_symbol], symbol.slice(6), overrides[symbol]);
-                } else if (overrides[symbol] !== null) {
+                if (symbol.startsWith('vfunc'))
+                    this.hookVfunc(proto[Gi.gobject_prototype_symbol], symbol.slice(6), overrides[symbol]);
+                else if (overrides[symbol] !== null)
                     proto[symbol] = overrides[symbol];
-                }
             }
         }
         return backup;
