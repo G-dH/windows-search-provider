@@ -455,9 +455,27 @@ const SearchResultsViewOverride = {
         });
 
         this._providers.forEach(provider => {
+            provider.searchInProgress = true;
             if (!selectedProviders.length || selectedProviders.includes(provider.id)) {
                 let previousProviderResults = previousResults[provider.id];
-                this._doProviderSearch(provider, previousProviderResults);
+                if (Me.shellVersion < 43) {
+                    if (this._isSubSearch && previousProviderResults) {
+                        provider.getSubsearchResultSet(previousProviderResults,
+                            this._terms,
+                            results => {
+                                this._gotResults(results, provider);
+                            },
+                            this._cancellable);
+                    } else {
+                        provider.getInitialResultSet(this._terms,
+                            results => {
+                                this._gotResults(results, provider);
+                            },
+                            this._cancellable);
+                    }
+                } else {
+                    this._doProviderSearch(provider, previousProviderResults);
+                }
             } else {
                 provider.display.visible = false;
             }
