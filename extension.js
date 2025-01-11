@@ -41,8 +41,6 @@ class ESP {
         this._wsp.update();
 
         this.Me = Me;
-
-        log(`${MyExtension.metadata.name}: enabled`);
     }
 
     disable() {
@@ -53,7 +51,5 @@ class ESP {
         this.Me.Util.cleanGlobals();
         this.Me = null;
         this._wsp = null;
-
-        log(`${MyExtension.metadata.name}: disabled`);
     }
 }
