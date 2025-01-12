@@ -168,7 +168,7 @@ var ListSearchResult = GObject.registerClass({
             if (timeout)
                 GLib.source_remove(timeout);
             timeout = GLib.timeout_add(GLib.PRIORITY_LOW, 200, () => {
-                Main.overview.searchController._searchResults._reset();
+                Main.overview._overview.controls._searchController._searchResults._reset();
                 Main.overview.searchEntry.text = text;
                 timeout = 0;
                 return GLib.SOURCE_REMOVE;
