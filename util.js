@@ -214,6 +214,11 @@ export function strictMatch(term, text) {
     return 0;
 }
 
+export function regexpMatch(term, text, caseInsensitive) {
+    const regex = new RegExp(term, caseInsensitive);
+    return regex.test(text) ? 0 : -1;
+}
+
 export function isMoreRelevant(stringA, stringB, pattern) {
     let regex = /[^a-zA-Z\d]/;
     let strSplitA = stringA.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().split(regex);
