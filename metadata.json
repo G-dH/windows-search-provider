@@ -6,10 +6,11 @@
   "shell-version": [
     "45",
     "46",
-    "47"
+    "47",
+    "48"
   ],
   "url": "https://github.com/G-dH/windows-search-provider",
   "donations": {"buymeacoffee": "georgdh"},
   "uuid": "windows-search-provider@G-dH.github.com",
-  "version-name": "47.2"
+  "version-name": "48.0"
 }
