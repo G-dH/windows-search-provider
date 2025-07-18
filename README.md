@@ -19,7 +19,7 @@ WSP is supported by the V-Shell extension which allows you to toggle the window 
 
 ## How to use WSP
 1.  Open the overview (press and release the Super key or trigger the hot corner)
-2.  a) Type any part (or multiple parts separated by space) of the name of the extension you are looking for; 5 first results will be added to the global search<br>
+2.  a) Type any part (or multiple parts separated by space) of the name of the window title you are looking for; 5 first results will be added to the global search<br>
     b) Type search prefix (default `wq//`, `qqw` or ``` ` ```/`;`/`|` (usually the key above Tab)) to display complete list of open windows. You can continue typing a string from the window title or app name to filter the list<br>
 3.  a) Activate the search result to activate the window<br>
     b) Activate the search result while holding down the *Shift* key to move the window to the current workspace and activate it
