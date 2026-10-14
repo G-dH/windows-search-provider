@@ -56,7 +56,6 @@ export const ListSearchResult = GObject.registerClass({
 
         let content = new St.BoxLayout({
             style_class: 'list-search-result-content',
-            vertical: false,
             // x_align: Clutter.ActorAlign.START,
             x_expand: true,
             y_expand: true,
